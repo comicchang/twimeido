@@ -1,14 +1,14 @@
-= TwiMeido =
+: ''おかえりなさいませ、ご主人様！''
 
-'''TwiMeido'''是一只Twitter的XMPP客户端，使用Twitter的Streaming API提供对时间线的实时提醒。
+'''TwiMeido'''是[https://twitter.com Twitter]的一只[http://xmpp.org XMPP]客户端，使用Twitter的[https://dev.twitter.com/pages/user_streams Streaming API]提供对时间线的实时提醒。
 
 == 功能 ==
 
 * 我会把您发送的信息推出去。
-* 我会把由一个<code>U+0020 SPACE ( )</code>或<code>U+002D HYPHEN-MINUS (-)</code>起始的消息当作命令。
-* 向我发送 <code>-oauth</code>来绑定您的推特帐户。
-* 我使用Google Latitude为推加上位置信息。
-* 在推特上Follow @[https://twitter.com/TwiMeido TwiMeido]以得到最新的开发新闻。
+* 我会把由一个[http://www.unicode.org/cgi-bin/GetUnihanData.pl?codepoint=U+0020 <code>U+0020 SPACE ( )</code>]、[http://www.unicode.org/cgi-bin/GetUnihanData.pl?codepoint=U+002D <code>U+002D HYPHEN-MINUS (-)</code>]或[http://www.unicode.org/cgi-bin/GetUnihanData.pl?codepoint=U+002E <code>U+002E FULL STOP (.)</code>]起始的消息当作命令。
+* 向我发送<code>-oauth</code>来通过[https://support.twitter.com/articles/76052 OAuth]绑定您的Twitter帐户。
+* 我使用[https://www.google.com/latitude Google Latitude]为推加上位置信息。
+* 在Twitter上Follow @[https://twitter.com/TwiMeido TwiMeido]以得到最新的开发新闻。
 
 == 可用命令 ==
 
@@ -86,9 +86,9 @@
 |}
 
 注：
-:# 每条推的ID有短和长两种：长ID为Twitter提供的数字（如<code>17618628396449792</code>），短ID为TwiMeido提供的（如<code>[ #XE = #602 | via TwiMeido ]</code>中的<code>XE</code>和<code>602</code>，数字和字母等效）。
-:# 实时通知的类型，请参见“实时通知”一节。
-:# 请'''不要'''跟踪过于热门的关键词（包括但不限于<code>Twitter</code>、<code>is</code>、<code>awesome</code>等）。
+# 每条推的ID有短和长两种：长ID为Twitter提供的数字（如<code>17618628396449792</code>），短ID为TwiMeido提供的（如<code>[ #XE = #602 | via TwiMeido ]</code>中的<code>XE</code>和<code>602</code>，数字和字母等效）。
+# 实时通知的类型，请参见[[#实时通知|实时通知]]一节。
+# 请'''不要'''跟踪过于热门的关键词（包括但不限于<code>Twitter</code>、<code>is</code>、<code>awesome</code>等）。
 
 === 实时通知 ===
 
