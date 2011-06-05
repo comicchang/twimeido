@@ -87,6 +87,7 @@
 
 注：
 # 每条推的ID有短和长两种：长ID为Twitter提供的数字（如<code>17618628396449792</code>），短ID为TwiMeido提供的（如<code>[ #XE = #602 | via TwiMeido ]</code>中的<code>XE</code>和<code>602</code>，数字和字母等效）。
+# 修改跟踪关键词时用<code>-</code>开头为删除，如<code>-track foo -bar</code>为开始跟踪<code>foo</code>并停止跟踪<code>bar</code>。
 # 实时通知的类型，请参见[[#实时通知|实时通知]]一节。
 # 请'''不要'''跟踪过于热门的关键词（包括但不限于<code>Twitter</code>、<code>is</code>、<code>awesome</code>等）。
 
