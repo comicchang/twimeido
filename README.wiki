@@ -1,0 +1,107 @@
+= TwiMeido =
+
+'''TwiMeido'''是一只Twitter的XMPP客户端，使用Twitter的Streaming API提供对时间线的实时提醒。
+
+== 功能 ==
+
+* 我会把您发送的信息推出去。
+* 我会把由一个<code>U+0020 SPACE ( )</code>或<code>U+002D HYPHEN-MINUS (-)</code>起始的消息当作命令。
+* 向我发送 <code>-oauth</code>来绑定您的推特帐户。
+* 我使用Google Latitude为推加上位置信息。
+* 在推特上Follow @[https://twitter.com/TwiMeido TwiMeido]以得到最新的开发新闻。
+
+== 可用命令 ==
+
+{|
+! 命令 !! 描述
+|-
+| <code>-bind PIN</code> || 提交Twitter返回的PIN以完成绑定过程。
+|-
+| <code>-b 用户名</code> || Block指定的用户。
+|-
+| <code>-del [ID]</code> || 删除指定的推，没有指定参数时删除发出的最后一推。
+|-
+| <code>-d</code> || 显示您收到的DM。
+|-
+| <code>-d 用户名 内容</code> || 向指定的用户发送DM。
+|-
+| <code>-fav ID</code> || Fav指定的推。
+|-
+| <code>-fav</code> || 显示您Fav过的推。
+|-
+| <code>-fo 用户名</code> || Follow指定的用户。
+|-
+| <code>-help</code> || 显示此帮助。
+|-
+| <code>-home</code> || 显示您的主时间线。
+|-
+| <code>-ib 用户名</code> || 显示您是否有Block指定的用户。
+|-
+| <code>-if 用户名 [用户名]</code> || 显示您与指定用户或两指定用户之间的Follow关系。
+|-
+| <code>-latitude bind PIN</code> || 提交Google返回的PIN以完成绑定过程。
+|-
+| <code>-latitude oauth</code> || 使用OAuth绑定您的Google Latitude帐户。
+|-
+| <code>-latitude on|off</code> || 启用或禁用发出推中附带的位置信息。
+|-
+| <code>-me</code> || 显示您发出的推。
+|-
+| <code>-oauth</code> || 使用OAuth绑定您的推特帐户。
+|-
+| <code>-off [通知类型]</code> || 关闭一种实时通知，没有指定参数时显示当前的通知列表。
+|-
+| <code>-on [通知类型]</code> || 开启一种实时通知，没有指定参数时显示当前的通知列表。
+|-
+| <code>-profile [用户名]</code> || 显示指定用户的推，没有指定参数时等同于<code>-me</code>。
+|-
+| <code>-ra ID 内容</code> || 回复指定的推中的所有人。
+|-
+| <code>-rd ID 内容</code> || 回复指定的DM。
+|-
+| <code>-re ID</code> || 官方RT指定的推。
+|-
+| <code>-reconnect</code> || 重新连接Streaming API。
+|-
+| <code>-r ID 内容</code>或<code>-@ ID 内容</code> || 回复指定的推。
+|-
+| <code>-rt ID [评论]</code> || RT指定的推。
+|-
+| <code>-r</code>或<code>-@</code> || 显示您的回复时间线。
+|-
+| <code>-show ID [对话长度]</code> || 显示指定的推和其对话，对话长度默认为5。
+|-
+| <code>-spam 用户名</code> || 报告指定的用户为Spam。
+|-
+| <code>-track [关键词]</code> || 修改主时间线跟踪列表，没有指定参数时显示列表当前内容。
+|-
+| <code>-unb 用户名</code> || Unblock指定的用户。
+|-
+| <code>-unfav ID</code> || Unfav指定的推。
+|-
+| <code>-unfo 用户名</code> || Unfollow指定的用户。
+|-
+| <code>-world [关键词]</code> || 修改全局跟踪列表，没有指定参数时显示列表当前内容。
+|-
+|}
+
+注：
+:# 每条推的ID有短和长两种：长ID为Twitter提供的数字（如<code>17618628396449792</code>），短ID为TwiMeido提供的（如<code>[ #XE = #602 | via TwiMeido ]</code>中的<code>XE</code>和<code>602</code>，数字和字母等效）。
+:# 实时通知的类型，请参见“实时通知”一节。
+:# 请'''不要'''跟踪过于热门的关键词（包括但不限于<code>Twitter</code>、<code>is</code>、<code>awesome</code>等）。
+
+=== 实时通知 ===
+
+{|
+! 通知类型 !! 描述
+|-
+| <code>dm</code> || 您收到的DM。
+|-
+| <code>event</code> || 和您相关的事件（如Follow等）。
+|-
+| <code>home</code> || 您的主时间线。
+|-
+| <code>mention</code> || 您的回复时间线。
+|-
+| <code>track</code> || 您跟踪的关键词。
+|}
