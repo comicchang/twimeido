@@ -31,6 +31,8 @@
 |-
 | <code>-fav</code> || 显示您Fav过的推。
 |-
+| <code>-filter [关键词]</code> || 过滤含有关键词的推。
+|-
 | <code>-fo 用户名</code> || Follow指定的用户。
 |-
 | <code>-help</code> || 显示此帮助。
@@ -49,7 +51,7 @@
 |-
 | <code>-me</code> || 显示您发出的推。
 |-
-| <code>-oauth</code> || 使用OAuth绑定您的推特帐户。
+| <code>-oauth</code> || 使用OAuth绑定您的Twitter帐户。
 |-
 | <code>-off [通知类型]</code> || 关闭一种实时通知，没有指定参数时显示当前的通知列表。
 |-
