@@ -85,12 +85,15 @@
 |-
 | <code>-unfo 用户名</code> || Unfollow指定的用户。
 |-
+| <code>-user [关键词]</code> || 修改用户跟踪列表，没有指定参数时显示列表当前内容。'''注意'''：会对<code>home</code>实时通知产生副作用。
+|-
 | <code>-world [关键词]</code> || 修改全局跟踪列表，没有指定参数时显示列表当前内容。
 |-
 |}
 
 注：
 # 每条推的ID有短和长两种：长ID为Twitter提供的数字（如<code>17618628396449792</code>），短ID为TwiMeido提供的（如<code>[ #XE = #602 | via TwiMeido ]</code>中的<code>XE</code>和<code>602</code>，数字和字母等效）。
+# <code>-track</code>跟踪您主时间线内的关键词，<code>-world</code>跟踪全球公开推中的关键词，<code>-user</code>跟踪指定用户发出的所有推。
 # 修改跟踪关键词时用<code>-</code>开头为删除，如<code>-track foo -bar</code>为开始跟踪<code>foo</code>并停止跟踪<code>bar</code>。
 # 实时通知的类型，请参见[[#实时通知|实时通知]]一节。
 # 请'''不要'''跟踪过于热门的关键词（包括但不限于<code>Twitter</code>、<code>is</code>、<code>awesome</code>等）。
