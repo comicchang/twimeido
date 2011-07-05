@@ -282,6 +282,7 @@ class User
   def reconnect_user_streams
     TwiMeido.user_streams[id].stop if TwiMeido.user_streams[id]
     connect_user_streams
+    setup_rest_polling
   end
 
   def remove_oauth_token
