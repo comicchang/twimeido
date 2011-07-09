@@ -90,8 +90,8 @@ class User
           latitude_oauth_token_secret
         )
         latitude = JSON.parse(access_token.get('https://www.googleapis.com/latitude/v1/currentLocation?granularity=best&key=' + AppConfig.google.access_key).body)
-        timestamp = Time.parse(latitude['data']['timestampMs'])
-        loc = {:lat => latitude['data']['latitude'], :lon => latitude['data']['longitude']} if timestamp < 1.hour.ago
+        timestamp = Time.at(latitude['data']['timestampMs'].to_f / 1000)
+        loc = {:lat => latitude['data']['latitude'], :lon => latitude['data']['longitude']} if timestamp > 1.hour.ago
       end
       loc ||= {}
     rescue OAuth::Error
