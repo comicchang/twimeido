@@ -233,7 +233,7 @@ class User
       :host => 'userstream.twitter.com',
       :path => '/2/user.json',
       :ssl => true,
-      :user_agent => "TwiMeido/#{TwiMeido::VERSION}",
+      :user_agent => "TwiMeido/#{TwiMeido::Version}",
       :filters => tracking_keywords_world,
       :params => params,
       :oauth => {
