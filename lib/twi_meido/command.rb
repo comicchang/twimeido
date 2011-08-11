@@ -62,6 +62,19 @@ module TwiMeido
       str.gsub('&lt;', '<').gsub('&gt;', '>')
     end
 
+    def parse_entities(status)
+      text = ActiveSupport::Multibyte::Chars.new(status.text).normalize(:c)
+      if status.entities.present?
+        status.entities.urls.each do |url|
+          if url.expanded_url
+            text[url['indices'][0]...url['indices'][1]] = url.expanded_url
+          end
+        end
+      end
+
+      text
+    end
+
     def extract_error_message(error)
       if error.respond_to? :response_body
         begin
@@ -112,15 +125,17 @@ module TwiMeido
     def format_single_tweet(tweet, shorten_id = true, conversation = nil, location = false)
 
       if tweet.retweeted_status.present?
+        text = parse_entities(tweet.retweeted_status)
         formatted_tweet = <<-TWEET
-#{tweet.retweeted_status.user.screen_name}: #{unescape(tweet.retweeted_status.text)}#{conversation}
+#{tweet.retweeted_status.user.screen_name}: #{unescape(text)}#{conversation}
 [ #{id_info(tweet.retweeted_status, shorten_id)} | #{time_info(tweet.retweeted_status)}via #{strip_tags(tweet.retweeted_status.source)} #{'[GEO] ' if tweet.retweeted_status.geo.present?}]
 [ #{id_info(tweet, shorten_id)} | Retweeted by #{tweet.user.screen_name} #{time_info(tweet)}via #{strip_tags(tweet.source)} #{'[GEO] ' if tweet.geo.present?}]
         TWEET
 
       elsif tweet.user.present?
+        text = parse_entities(tweet)
         formatted_tweet = <<-TWEET
-#{tweet.user.screen_name}: #{unescape(tweet.text)}#{conversation}
+#{tweet.user.screen_name}: #{unescape(text)}#{conversation}
 [ #{id_info(tweet, shorten_id)} | #{time_info(tweet)}via #{strip_tags(tweet.source)} #{'[GEO] ' if tweet.geo.present?}]
         TWEET
 
@@ -200,9 +215,10 @@ module TwiMeido
     def format_dm(dm, shorten_id = true)
       TwiMeido.current_user.view_dm!(dm)
 
+      text = parse_entities(dm)
       formatted_dm = <<-DM
 DM from #{dm.sender.screen_name} (#{dm.sender.name}):
-#{unescape(dm.text)}
+#{unescape(text)}
 [ #{dm_id_info(dm, shorten_id)} ]
       DM
     end
