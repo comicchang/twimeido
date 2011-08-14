@@ -7,8 +7,6 @@ meido:
 twitter:
   consumer_key:
   consumer_secret:
-  username:
-  password:
 
 google:
   consumer_key:
