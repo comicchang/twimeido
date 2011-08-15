@@ -65,10 +65,10 @@ module TwiMeido
     def parse_entities(status)
       text = ActiveSupport::Multibyte::Chars.new(status.text).normalize(:c)
       if status.entities.present?
-        status.entities.media.present? and status.entities.media.each do |media|
+        status.entities.media.present? and status.entities.media.reverse.each do |media|
           text[media['indices'][0]...media['indices'][1]] = media.media_url_https
         end
-        status.entities.urls.each do |url|
+        status.entities.urls.reverse.each do |url|
           if url.expanded_url
             text[url['indices'][0]...url['indices'][1]] = url.expanded_url
           end
