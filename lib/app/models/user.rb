@@ -329,7 +329,7 @@ class User
 
     sleep 5
   rescue => e
-    puts "#{Time.now.to_s :db} #{e.inspect}"
+    puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end
 
   def pull_dms
@@ -351,7 +351,7 @@ class User
 
     sleep 5
   rescue => e
-    puts "#{Time.now.to_s :db} #{e.inspect}"
+    puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end
 
   def update_blocked_user_ids
@@ -361,6 +361,6 @@ class User
 
     sleep 5
   rescue => e
-    puts "#{Time.now.to_s :db} #{e.inspect}"
+    puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end
 end
