@@ -225,17 +225,17 @@ class User
 
   def connect_user_streams
     if !tracking_user.empty? and notification.include? :track
-      params = {:replies => 'all'}
+      params = '?replies=all'
     else
-      params = {}
+      params = ''
     end
     stream = Twitter::JSONStream.connect(
       :host => 'userstream.twitter.com',
-      :path => '/2/user.json',
+      :path => '/2/user.json' + params,
       :ssl => true,
       :user_agent => "TwiMeido/#{TwiMeido::Version}",
       :filters => tracking_keywords_world,
-      :params => params,
+      #:params => params,
       :oauth => {
         :consumer_key    => AppConfig.twitter.consumer_key,
         :consumer_secret => AppConfig.twitter.consumer_secret,
