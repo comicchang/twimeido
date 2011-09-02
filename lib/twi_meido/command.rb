@@ -334,8 +334,7 @@ Tweets per day: #{'%.2f' % (user.statuses_count.to_f / (Time.now.to_date - Time.
           current_user.blocked_user_ids.uniq!
           current_user.save
         end
-      end
-      if current_user.notification.include?(:event)
+      elsif current_user.notification.include?(:event)
         format_event(event)
       end
     end
