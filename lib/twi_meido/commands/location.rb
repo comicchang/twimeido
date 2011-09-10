@@ -31,7 +31,6 @@ After that you'll get a PIN code, use it with -latitude bind command to complete
         res = http.request(req)
         res.value
         res = Hashie::Mash.new(JSON.parse(res.body))
-        puts res.access_token
         user.update_attributes(
           :latitude_access_token => res.access_token,
           :latitude_created_at => Time.now,
@@ -41,7 +40,7 @@ After that you'll get a PIN code, use it with -latitude bind command to complete
         response = <<-MESSAGE
 Successfully bound your Google Latitude, use -latitude on to send tweets with geo-location, ご主人様.
         MESSAGE
-      rescue Net::HTTPUnauthorized
+      rescue # Net::HTTPUnauthorized
         response = 'OAuth with Google Latitude failed, please retry by use -latitude oauth command, ご主人様.'
       end
 

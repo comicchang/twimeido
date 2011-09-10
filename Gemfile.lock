@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/rainux/twitter-stream.git
-  revision: 0b97cbb44e7648b958faa0507e7a3bddda860b28
+  revision: a1a1666e87299e8862573169ceb449a261df0dc8
   specs:
     twitter-stream (0.1.14)
       eventmachine (>= 0.12.8)
