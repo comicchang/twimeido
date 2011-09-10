@@ -9,7 +9,6 @@ twitter:
   consumer_secret:
 
 google:
-  consumer_key:
-  consumer_secret:
-  access_key:
-  domain:
+  client_id:
+  client_secret:
+  api_key:

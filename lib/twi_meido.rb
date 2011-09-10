@@ -3,6 +3,9 @@ require 'bundler/setup'
 Bundler.require
 require 'active_support/time_with_zone'
 require 'yaml'
+require 'net/http'
+require 'net/https'
+require 'uri'
 require 'twi_meido/version'
 
 MongoMapper.database = 'twi_meido'

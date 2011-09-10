@@ -9,11 +9,11 @@ class User
   key :request_token_secret,    String
   key :oauth_token,             String, :index => true
   key :oauth_token_secret,      String, :index => true
-  key :latitude_request_token,        String
-  key :latitude_request_token_secret, String
-  key :latitude_oauth_token,          String, :index => true
-  key :latitude_oauth_token_secret,   String, :index => true
-  key :latitude_on,                   Integer, :default => -1
+  key :latitude_access_token,   String, :index => true
+  key :latitude_created_at,     Time
+  key :latitude_expires_in,     Integer
+  key :latitude_refresh_token,  String, :index => true
+  key :latitude_on,             Integer, :default => -1
   key :notification,            Array, :default => [:mention, :dm, :event]
   key :tracking_keywords,       Array
   key :tracking_keywords_world, Array
@@ -71,36 +71,47 @@ class User
     end
   end
 
- def update_status!(data)
-    begin
-      if latitude_on == 1
-        client = OAuth::Consumer.new(
-          AppConfig.google.consumer_key,
-          AppConfig.google.consumer_secret,
-          { :site => 'https://www.google.com',
-            :request_token_path => '/accounts/OAuthGetRequestToken',
-            :access_token_path => '/accounts/OAuthGetAccessToken',
-            :authorize_path => '/latitude/apps/OAuthAuthorizeToken',
-            :signature_method => 'HMAC-SHA1'
-          }
-        )
-        access_token = OAuth::AccessToken.new(
-          client,
-          latitude_oauth_token,
-          latitude_oauth_token_secret
-        )
-        latitude = JSON.parse(access_token.get('https://www.googleapis.com/latitude/v1/currentLocation?granularity=best&key=' + AppConfig.google.access_key).body)
+  def check_latitude_expire
+    if latitude_created_at < (latitude_expires_in - 60).seconds.ago
+      uri = URI.parse 'https://accounts.google.com/o/oauth2/token'
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      req = Net::HTTP::Post.new uri.request_uri
+      req.set_form_data({
+        :client_id => AppConfig.google.client_id,
+        :client_secret => AppConfig.google.client_secret,
+        :refresh_token => latitude_refresh_token,
+        :grant_type => 'refresh_token'
+      })
+      res = http.request(req)
+      res.value
+      res = Hashie::Mash.new(JSON.parse(res.body))
+      latitude_access_token = res.access_token
+      latitude_created_at = Time.now
+      latitude_expires_in = res.expires_in
+      latitude_refresh_token = res.refresh_token
+      save
+    end
+  end
+
+  def update_status!(data)
+    if latitude_on == 1
+      begin
+        check_latitude_expire
+        uri = URI.parse('https://www.googleapis.com/latitude/v1/currentLocation?granularity=best&key=' + AppConfig.google.api_key + '&access_token=' + latitude_access_token)
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        res = http.request(Net::HTTP::Get.new(uri.request_uri))
+        res.value
+        latitude = JSON.parse(res.body)
         timestamp = Time.at(latitude['data']['timestampMs'].to_f / 1000)
         loc = {:lat => latitude['data']['latitude'], :lon => latitude['data']['longitude']} if timestamp > 1.hour.ago
+      rescue Net::HTTPUnauthorized
+        remove_latitude_token
       end
       loc ||= {}
-    rescue OAuth::Error
-      latitude_oauth_token = nil
-      latitude_oauth_token_secret = nil
-      latitude_on = 0
-      save
-      loc = {}
     end
+
     rest_api_client.statuses.update! data.merge(loc)
   end
 
@@ -288,6 +299,12 @@ class User
   def remove_oauth_token
     self.oauth_token = nil
     self.oauth_token_secret = nil
+    save
+  end
+
+  def remove_latitude_token
+    self.latitude_access_token = nil
+    self.latitude_on = 0
     save
   end
 
