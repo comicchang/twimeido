@@ -220,8 +220,7 @@ module TwiMeido
 
       text = parse_entities(dm)
       formatted_dm = <<-DM
-DM from #{dm.sender.screen_name} (#{dm.sender.name}):
-#{unescape(text)}
+DM #{dm.sender.screen_name} (#{dm.sender.name}): #{unescape(text)}
 [ #{dm_id_info(dm, shorten_id)} ]
       DM
     end

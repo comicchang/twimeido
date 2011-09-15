@@ -153,14 +153,12 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
     end
 
     define_command :direct_messages, /\Ad\Z/i do |user, message|
-      tweets = TwiMeido.current_user.rest_api_client.direct_messages?
-      tweets.collect! do |tweet|
-        <<-DM
-#{tweet.sender.screen_name}: #{unescape(tweet.text)}
-        DM
+      dms = TwiMeido.current_user.rest_api_client.direct_messages?
+      dms.collect! do |dm|
+        format_dm(dm)
       end
 
-      tweets.reverse.join("\n")
+      dms.reverse.join("\n")
     end
 
     define_command :favorites, /\Afav\Z/i do |user, message|
