@@ -373,8 +373,7 @@ class User
 
   def update_blocked_user_ids
     users = rest_api_client.blocks.blocking? # wtf Twitter would ignore :page
-    blocked_user_ids = users.collect(&:id)
-    save
+    update_attributes(:blocked_user_ids => users.collect(&:id))
 
     sleep 5
   rescue => e
