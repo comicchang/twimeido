@@ -117,7 +117,7 @@ Currently you've turned on #{user.notification.join(' ')}.
 
     define_command :world, /\A(un)?world(?:\s+(.*))?\Z/i do |user, message, params|
       un = params[1]
-      keywords = params[2].to_s.downcase.split(/\s+/)
+      keywords = CGI::escape(params[2].to_s.downcase).split(/\s+/)
       if un # unworld
         user.tracking_keywords_world -= keywords
       else  # world

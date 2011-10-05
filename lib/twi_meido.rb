@@ -3,6 +3,7 @@ require 'bundler/setup'
 Bundler.require
 require 'active_support/time_with_zone'
 require 'yaml'
+require 'cgi'
 require 'net/http'
 require 'net/https'
 require 'uri'
