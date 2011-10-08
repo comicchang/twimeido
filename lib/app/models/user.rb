@@ -198,7 +198,11 @@ class User
     #       followings are enabled.
     #       But actually all @replies *to* followings are enabled too.
 
-    # The tweet is sent by a friend?
+    # The tweet was sent by myself?
+    if tweet.user.id == twitter_user_id
+      return true
+    end
+    # The tweet was sent by a friend?
     if !friends_ids.include? tweet.user.id
       return false
     end

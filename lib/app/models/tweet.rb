@@ -5,6 +5,7 @@ class Tweet
   key :entities, Hashie::Mash
   key :user, Hashie::Mash
   key :retweeted_status, Hashie::Mash
+  key :geo, Hashie::Mash
 
   class << self
     def fetch(id)
