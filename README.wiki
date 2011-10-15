@@ -19,6 +19,8 @@
 |-
 | <code>-bind PIN</code> || 提交Twitter返回的PIN以完成绑定过程。
 |-
+| <code>-bio s///</code> || 使用正则表达式对您的Bio执行替换。
+|-
 | <code>-b 用户名</code> || Block指定的用户。
 |-
 | <code>-del [ID]</code> || 删除指定的推，没有指定参数时删除发出的最后一推。
