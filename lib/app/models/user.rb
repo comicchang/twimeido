@@ -72,7 +72,7 @@ class User
   end
 
   def check_latitude_expire
-    if latitude_created_at < (latitude_expires_in - 300).seconds.ago
+    if latitude_refresh_token && (latitude_created_at < (latitude_expires_in - 300).seconds.ago)
       uri = URI.parse 'https://accounts.google.com/o/oauth2/token'
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
@@ -86,11 +86,10 @@ class User
       res = http.request(req)
       res.value
       res = Hashie::Mash.new(JSON.parse(res.body))
-      latitude_access_token = res.access_token
-      latitude_created_at = Time.now
-      latitude_expires_in = res.expires_in
-      #latitude_refresh_token = res.refresh_token
-      save
+      update_attributes(
+        :latitude_access_token => res.access_token,
+        :latitude_created_at => Time.now,
+        :latitude_expires_in => res.expires_in)
     end
   end
 
@@ -106,7 +105,7 @@ class User
         latitude = JSON.parse(res.body)
         timestamp = Time.at(latitude['data']['timestampMs'].to_f / 1000)
         loc = {:lat => latitude['data']['latitude'], :lon => latitude['data']['longitude']} if timestamp > 1.hour.ago
-      rescue # Net::HTTPUnauthorized
+      rescue Net::HTTPUnauthorized
         remove_latitude_token
       end
     end
@@ -308,6 +307,7 @@ class User
 
   def remove_latitude_token
     self.latitude_access_token = nil
+    self.latitude_refresh_token = nil
     self.latitude_on = 0
     save
   end
