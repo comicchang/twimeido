@@ -51,6 +51,9 @@ module TwiMeido
         return <<-HELP
 * Start use me by send -oauth command to bind your Twitter account.
 * Send -help command for detailed help.
+*本机器人基于@rainux的twi-meido项目，部分命令依个人习惯略有修改*
+*可以到 http://goo.gl/x8awn 查看帮助文件的最新版本*
+*有任何疑问可以联系 @Orz_C*
         HELP
       else
         return "#{extract_error_message(error)}, ご主人様."
