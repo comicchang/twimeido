@@ -2,7 +2,7 @@ module TwiMeido
   module TimelineCommands
     extend Command
 
-    define_command :retweet, /\Are\s+(\d+|[a-z]+)\Z/i do |user, message, params|
+    define_command :retweet, /\A(?:r|re)\s+(\d+|[a-z]+)\Z/i do |user, message, params|
       id = params[1]
 
       tweet = user.fetch_tweet(id)
@@ -128,7 +128,7 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
       response
     end
 
-    define_command :home, /\Ahome(?:\s+(\d+))?\Z/i do |user, message, params|
+    define_command :home, /\A(?:home|ho)(?:\s+(\d+))?\Z/i do |user, message, params|
       count = params[1].to_i
       count = 20 if count.zero?
 
@@ -170,6 +170,15 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
       tweets.reverse.join("\n")
     end
 
+    define_command :status, /\A(?:st|st(\s+(\S+)))\Z/i do |user, message, params|
+      screen_name = params[1] ? params[1] : user.screen_name
+
+      profile = TwiMeido.current_user.rest_api_client.users.show?(:screen_name => screen_name)
+      message = format_profile(profile)
+
+      message
+    end
+
     define_command :profile, /\A(?:me|profile(?:\s+(\S+))?)(?:\s+(\d+))?\Z/i do |user, message, params|
       begin
         screen_name = params[1] ? params[1] : user.screen_name
@@ -191,6 +200,27 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
       profile = TwiMeido.current_user.rest_api_client.users.show?(:screen_name => screen_name)
       message += "\n" + format_profile(profile)
 
+      message
+    end
+
+    define_command :timeline, /\A(?:tl|tl(?:\s+(\S+))?)(?:\s+(\d+))?\Z/i do |user, message, params|
+      begin
+        screen_name = params[1] ? params[1] : user.screen_name
+        count = params[2].to_i
+        count = 10 if count.zero?
+
+        tweets = TwiMeido.current_user.rest_api_client.statuses.user_timeline?(:screen_name => screen_name, :count => count)
+        tweets.collect! do |tweet|
+          format_tweet(tweet)
+        end
+        message = tweets.reverse.join("\n")
+      rescue Grackle::TwitterError => error
+        if error.status == 401
+          message = "@#{screen_name} is protected, ご主人様."
+        else
+          raise error
+        end
+      end
       message
     end
 
@@ -216,7 +246,7 @@ Successfully deleted your tweet #{id}.
       message << format_tweet(tweet)
     end
 
-    define_command :show, /\Ashow\s+(\d+|[a-z]+)(\s+\d+)?\Z/i do |user, message, params|
+    define_command :show, /\A(?:show|msg)\s+(\d+|[a-z]+)(\s+\d+)?\Z/i do |user, message, params|
       id = params[1]
       length = params[2].to_i
       length = 5 if length.zero?
