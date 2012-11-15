@@ -251,7 +251,12 @@ Successfully deleted your tweet #{id}.
       length = params[2].to_i
       length = 5 if length.zero?
 
-      format_tweet(user.fetch_tweet(id), true, length, true)
+      tweet = user.fetch_tweet(id)
+      if tweet.respond_to?(:in_reply_to_status_id)
+        format_tweet(user.fetch_tweet(id), true, length, true)
+      else
+        "The tweet you are looking is not exist, ご主人様.\n"
+      end
     end
 
     define_command :favorite, /\Afav\s+(\d+|[a-z]+)\Z/i do |user, message, params|
