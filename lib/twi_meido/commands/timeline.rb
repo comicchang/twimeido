@@ -2,7 +2,7 @@ module TwiMeido
   module TimelineCommands
     extend Command
 
-    define_command :retweet, /\A(?:r|re)\s+(\d+|[a-z]+)\Z/i do |user, message, params|
+    define_command :retweet, /\Ar(?:e)?\s+(\d+|[a-z]+)\Z/i do |user, message, params|
       id = params[1]
 
       tweet = user.fetch_tweet(id)
@@ -128,7 +128,7 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
       response
     end
 
-    define_command :home, /\A(?:home|ho)(?:\s+(\d+))?\Z/i do |user, message, params|
+    define_command :home, /\Aho(?:me)?(?:\s+(\d+))?\Z/i do |user, message, params|
       count = params[1].to_i
       count = 20 if count.zero?
 
@@ -170,7 +170,7 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
       tweets.reverse.join("\n")
     end
 
-    define_command :status, /\A(?:st|st(\s+(\S+)))\Z/i do |user, message, params|
+    define_command :status, /\Ast(\s+(\S+))?\Z/i do |user, message, params|
       screen_name = params[1] ? params[1] : user.screen_name
 
       profile = TwiMeido.current_user.rest_api_client.users.show?(:screen_name => screen_name)
@@ -205,9 +205,14 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
 
     define_command :timeline, /\A(?:tl|tl(?:\s+(\S+))?)(?:\s+(\d+))?\Z/i do |user, message, params|
       begin
-        screen_name = params[1] ? params[1] : user.screen_name
         count = params[2].to_i
-        count = 10 if count.zero?
+        if not params[1] and count > 200
+            count = 10
+            screen_name = params[2]
+        else 
+            count = 10 if count.zero?
+            screen_name = params[1] ? params[1] : user.screen_name
+        end
 
         tweets = TwiMeido.current_user.rest_api_client.statuses.user_timeline?(:screen_name => screen_name, :count => count)
         tweets.collect! do |tweet|
