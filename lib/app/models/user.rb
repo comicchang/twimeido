@@ -253,7 +253,7 @@ class User
     end
     stream = Twitter::JSONStream.connect(
       :host => 'userstream.twitter.com',
-      :path => '/2/user.json' + params,
+      :path => '/1.1/user.json' + params,
       :ssl => true,
       :user_agent => "TwiMeido/#{TwiMeido::Version}",
       :filters => tracking_keywords_world,
