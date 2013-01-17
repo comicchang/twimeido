@@ -4,16 +4,21 @@ class User
   include TwiMeido::Command
   plugin MongoMapper::Plugins::IdentityMap
 
-  key :jabber_id,               String, :index => true
+  key :jabber_id,               String
+  ensure_index :jabber_id
   key :last_said,               String
   key :request_token,           String
   key :request_token_secret,    String
-  key :oauth_token,             String, :index => true
-  key :oauth_token_secret,      String, :index => true
-  key :latitude_access_token,   String, :index => true
+  key :oauth_token,             String
+  ensure_index :oauth_token
+  key :oauth_token_secret,      String
+  ensure_index :oauth_token_secret
+  key :latitude_access_token,   String
+  ensure_index :latitude_access_token
   key :latitude_created_at,     Time
   key :latitude_expires_in,     Integer
-  key :latitude_refresh_token,  String, :index => true
+  key :latitude_refresh_token,  String
+  ensure_index :latitude_refresh_token
   key :latitude_on,             Integer, :default => -1
   key :notification,            Array, :default => [:mention, :dm, :event]
   key :tracking_keywords,       Array
@@ -32,8 +37,10 @@ class User
   timestamps!
 
   key :screen_name,             String
-  key :twitter_user_id,         Integer, :index => true
+  key :twitter_user_id,         Integer
+  ensure_index :twitter_user_id
   key :twitter_user_created_at, DateTime
+
 
   Notifications = [:home, :mention, :dm, :event, :track]
   MaxShortId = 'ZZ'.as_b26_to_i
