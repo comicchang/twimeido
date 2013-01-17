@@ -348,7 +348,7 @@ class User
   def pull_mentions
     return unless last_mention_id
 
-    tweets = rest_api_client.statuses.mentions?(
+    tweets = rest_api_client.statuses.mentions_timeline?(
       :since_id => last_mention_id, :count => 200, :include_entities => true
     )
     return if tweets.empty?
@@ -384,7 +384,7 @@ class User
   end
 
   def update_blocked_user_ids
-    users = rest_api_client.blocks.blocking? # wtf Twitter would ignore :page
+    users = rest_api_client.blocks.list? # fixme use cursor
     update_attributes(:blocked_user_ids => users.collect(&:id))
 
     sleep 5

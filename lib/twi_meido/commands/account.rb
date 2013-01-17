@@ -237,27 +237,10 @@ Currently you've turned on #{user.notification.join(' ')}.
       "You're no longer blocking @#{screen_name} now, ご主人様."
     end
 
-    define_command :if_block, /\Aib\s+(\S+)\Z/i do |user, message, params|
-      begin
-        screen_name = params[1]
-
-        TwiMeido.current_user.rest_api_client.blocks.exists? :screen_name => screen_name
-        message = "You're blocking @#{screen_name}, ご主人様."
-      rescue Grackle::TwitterError => error
-        if error.status == 404
-          message = "You're not blocking @#{screen_name}, ご主人様."
-        else
-          raise error
-        end
-      end
-
-      message
-    end
-
     define_command :report_spam, /\Aspam\s+(\S+)\Z/i do |user, message, params|
       screen_name = params[1]
 
-      TwiMeido.current_user.rest_api_client.report_spam! :screen_name => screen_name
+      TwiMeido.current_user.rest_api_client.users.report_spam! :screen_name => screen_name
       "You have reported @#{screen_name} as spam, ご主人様."
     end
   end

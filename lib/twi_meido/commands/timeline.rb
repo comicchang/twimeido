@@ -8,7 +8,7 @@ module TwiMeido
 
       tweet = user.fetch_tweet(id)
       begin
-        TwiMeido.current_user.rest_api_client.statuses.retweet!(:id => tweet.id)
+        TwiMeido.current_user.rest_api_client.statuses.retweet._(tweet.id).json!
         response = "Successfully retweeted tweet #{id_info(tweet, true)}, ご主人様."
       rescue Grackle::TwitterError => error
         if error.status == 403
@@ -145,7 +145,7 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
       count = params[1].to_i
       count = 20 if count.zero?
 
-      tweets = TwiMeido.current_user.rest_api_client.statuses.mentions? :include_entities => true, :count => count
+      tweets = TwiMeido.current_user.rest_api_client.statuses.mentions_timeline? :include_entities => true, :count => count
       tweets.collect! do |tweet|
         format_tweet(tweet)
       end
@@ -163,7 +163,7 @@ Successfully replied to all mentioned users of #{in_reply_to_tweet.user.screen_n
     end
 
     define_command :favorites, /\Afav\Z/i do |user, message|
-      tweets = TwiMeido.current_user.rest_api_client.favorites? :include_entities => true
+      tweets = TwiMeido.current_user.rest_api_client.favorites.list? :include_entities => true
       tweets.collect! do |tweet|
         format_tweet(tweet)
       end
@@ -213,7 +213,7 @@ Successfully deleted your tweet #{id}.
         MESSAGE
       end
 
-      tweet = TwiMeido.current_user.rest_api_client.statuses.destroy!(:id => id)
+      tweet = TwiMeido.current_user.rest_api_client.statuses.destroy._(id).json!
       message << format_tweet(tweet)
     end
 
