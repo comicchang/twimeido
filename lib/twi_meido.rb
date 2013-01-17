@@ -109,7 +109,7 @@ MESSAGE
       end
       user.save
     end
-    callback = lambda {
+    callback = lambda { |x|
       timer.cancel
     }
     client.register_tmp_handler stanza.id, &callback
