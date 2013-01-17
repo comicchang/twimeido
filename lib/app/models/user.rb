@@ -385,7 +385,7 @@ class User
 
   def update_blocked_user_ids
     users = rest_api_client.blocks.list? # fixme use cursor
-    update_attributes(:blocked_user_ids => users.collect(&:id))
+    update_attributes(:blocked_user_ids => users[:users].collect(&:id))
 
     sleep 5
   rescue => e
