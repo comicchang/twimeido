@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Grackle
   module Handlers
     class JSON2MashHandler

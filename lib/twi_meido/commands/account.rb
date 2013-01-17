@@ -1,3 +1,4 @@
+# encoding: utf-8
 module TwiMeido
   module AccountCommands
     extend Command
