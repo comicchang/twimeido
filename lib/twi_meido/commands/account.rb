@@ -147,7 +147,7 @@ Currently you've turned on #{user.notification.join(' ')}.
 
     define_command :filter, /\A(un)?filter(?:\s+(.*))?\Z/i do |user, message, params|
       un = params[1]
-      keywords = params[1].to_s.downcase.split(/\s+/)
+      keywords = params[2].to_s.downcase.split(/\s+/)
       if un # unfilter
         user.filter_keywords -= keywords
       else  # filter
