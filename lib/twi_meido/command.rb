@@ -117,12 +117,16 @@ module TwiMeido
     end
 
     def load_conversation(tweet, shorten_id = true, conversation_length = 5)
-      if tweet.in_reply_to_status_id && conversation_length > 0
-        in_reply_to_tweet = Tweet.fetch(tweet.in_reply_to_status_id)
-        if in_reply_to_tweet
-          conversation = [format_single_tweet(in_reply_to_tweet, shorten_id)]
-          conversation << load_conversation(in_reply_to_tweet, shorten_id, conversation_length - 1)
+      begin
+        if tweet.in_reply_to_status_id && conversation_length > 0
+          in_reply_to_tweet = Tweet.fetch(tweet.in_reply_to_status_id)
+          if in_reply_to_tweet
+            conversation = [format_single_tweet(in_reply_to_tweet, shorten_id)]
+            conversation << load_conversation(in_reply_to_tweet, shorten_id, conversation_length - 1)
+          end
         end
+      rescue NoMethodError
+        ''
       end
     end
 
