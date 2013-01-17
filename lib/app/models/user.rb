@@ -329,12 +329,12 @@ class User
           TwiMeido.current_user = self
           pull_mentions if notification.include?(:mention)
           pull_dms if notification.include?(:dm)
-          update_blocked_user_ids
         }
 
         EM.defer(pull_rest_api)
       end
     end
+    update_blocked_user_ids
   end
 
   private
@@ -386,8 +386,6 @@ class User
   def update_blocked_user_ids
     users = rest_api_client.blocks.list? # fixme use cursor
     update_attributes(:blocked_user_ids => users[:users].collect(&:id))
-
-    sleep 5
   rescue => e
     puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end
