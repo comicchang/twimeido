@@ -1,11 +1,11 @@
 source 'http://rubygems.org'
 
 gem 'blather', :require => 'blather/client'
-gem 'twitter-stream', :require => 'twitter/json_stream', :git => 'git://github.com/rainux/twitter-stream.git'
+gem 'twitter-stream', :require => 'twitter/json_stream', :git => 'git://github.com/jimmyxu/twitter-stream.git'
 gem 'oauth'
 gem 'twitter_oauth'
 gem 'geokit'
-gem 'grackle'
+gem 'grackle', :git => 'git://github.com/jimmyxu/grackle.git'
 gem 'mongo_mapper'
 gem 'bson_ext'
 gem 'activesupport'
@@ -23,9 +23,9 @@ group :development do
   gem 'irbtools-more', :require => nil
   gem 'irb_rocket', :require => nil
 
-  gem 'rspec', '>= 2.5.0'
-  gem 'yard', '~> 0.6.0'
-  gem 'bundler', '~> 1.0.0'
-  gem 'jeweler', '~> 1.6.0'
-  gem 'rcov', '>= 0'
+  gem 'rspec'
+  gem 'yard'
+  gem 'bundler'
+  gem 'jeweler'
+  gem (RUBY_VERSION >= "1.9" ? "simplecov" : "rcov")
 end
