@@ -57,7 +57,7 @@ module TwiMeido
 
   when_ready do
     client.roster.each do |jid, roster_item|
-      discover :info, jid, nil
+      #discover :info, jid, nil
     end
 
     connect_user_streams
@@ -67,8 +67,9 @@ module TwiMeido
   end
 
   subscription :request? do |s|
-    User.first_or_create(:jabber_id => s.from.stripped.to_s)
+    User.first_or_create(:jabber_id => s.from.stripped.to_s.downcase)
     write_to_stream s.approve!
+    write_to_stream s.request!
     say s.to, <<MESSAGE
 おかえりなさいませ、ご主人様！
 
@@ -78,7 +79,7 @@ MESSAGE
 
   message :chat?, :body do |m|
     operation = lambda {
-      self.current_user = User.first_or_create(:jabber_id => m.from.stripped.to_s)
+      self.current_user = User.first_or_create(:jabber_id => m.from.stripped.to_s.downcase)
       process_message(current_user, m)
     }
     callback = lambda {|response|
@@ -94,7 +95,7 @@ MESSAGE
   end
 
   status :state => :unavailable do |s|
-    user = User.first_or_create(:jabber_id => s.from.stripped.to_s)
+    user = User.first_or_create(:jabber_id => s.from.stripped.to_s.downcase)
     stanza = Blather::Stanza::Presence.new
     stanza.id = stanza.object_id
     stanza.type = :probe
@@ -118,7 +119,7 @@ MESSAGE
   end
 
   status do |s|
-    user = User.first_or_create(:jabber_id => s.from.stripped.to_s)
+    user = User.first_or_create(:jabber_id => s.from.stripped.to_s.downcase)
     if user.home_was_on == 1
       user.home_was_on = -1
       user.notification += [:home]
@@ -145,6 +146,7 @@ MESSAGE
 
   def self.send_message(user, message)
     # The trailing space can prevent Google Talk chomp the blank line
+    message = message.to_s
     message = message.rstrip + "\n\n "
     jabber_id = user.respond_to?(:jabber_id) ? user.jabber_id : user
     say jabber_id, message
