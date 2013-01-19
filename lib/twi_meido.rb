@@ -128,8 +128,8 @@ MESSAGE
   end
 
   def self.process_user_stream(item)
-    notification = extract_notification(item)
-    send_message(current_user, notification) if notification
+    notification = extract_notification(item).to_s
+    send_message(current_user, notification) unless notification.empty?
   end
 
   def self.process_rest_polling(items)
