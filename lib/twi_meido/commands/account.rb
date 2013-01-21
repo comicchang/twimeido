@@ -148,11 +148,11 @@ Currently you've turned on #{user.notification.join(' ')}.
 
     define_command :filter, /\A(un)?filter(?:\s+(.*))?\Z/i do |user, message, params|
       un = params[1]
-      keywords = params[2].to_s.downcase.split(/\s+/)
+      keyword = params[2].to_s.downcase
       if un # unfilter
-        user.filter_keywords -= keywords
+        user.filter_keywords -= [keyword]
       else  # filter
-        user.filter_keywords += keywords
+        user.filter_keywords += [keyword]
       end
       user.filter_keywords.uniq!
       user.save
