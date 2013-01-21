@@ -41,7 +41,7 @@ module TwiMeido
     attr_accessor :user_streams
 
     def current_user
-      Thread.current[:current_user]
+      Thread.current[:current_user].reload
     end
 
     def current_user=(user)
