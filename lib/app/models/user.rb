@@ -1,18 +1,24 @@
+# encoding: utf-8
 class User
   include MongoMapper::Document
   include TwiMeido::Command
   plugin MongoMapper::Plugins::IdentityMap
 
-  key :jabber_id,               String, :index => true
+  key :jabber_id,               String
+  ensure_index :jabber_id
   key :last_said,               String
   key :request_token,           String
   key :request_token_secret,    String
-  key :oauth_token,             String, :index => true
-  key :oauth_token_secret,      String, :index => true
-  key :latitude_access_token,   String, :index => true
+  key :oauth_token,             String
+  ensure_index :oauth_token
+  key :oauth_token_secret,      String
+  ensure_index :oauth_token_secret
+  key :latitude_access_token,   String
+  ensure_index :latitude_access_token
   key :latitude_created_at,     Time
   key :latitude_expires_in,     Integer
-  key :latitude_refresh_token,  String, :index => true
+  key :latitude_refresh_token,  String
+  ensure_index :latitude_refresh_token
   key :latitude_on,             Integer, :default => -1
   key :notification,            Array, :default => [:mention, :dm, :event]
   key :tracking_keywords,       Array
@@ -31,8 +37,10 @@ class User
   timestamps!
 
   key :screen_name,             String
-  key :twitter_user_id,         Integer, :index => true
+  key :twitter_user_id,         Integer
+  ensure_index :twitter_user_id
   key :twitter_user_created_at, DateTime
+
 
   Notifications = [:home, :mention, :dm, :event, :track]
   MaxShortId = 'ZZ'.as_b26_to_i
@@ -231,8 +239,13 @@ class User
 
   def filtered?(tweet)
     tweet_text = tweet.text.downcase
+    tweet_source = tweet.source.downcase.gsub %r!\A<a .+?>(.+?)</a>\Z!, '\1'
     found = filter_keywords.select do |keyword|
-      tweet_text.include?(keyword.downcase)
+      if keyword.start_with? 'source:'
+        keyword == "source:#{tweet_source}"
+      else
+        tweet_text.include?(keyword)
+      end
     end
     !found.empty?
   end
@@ -245,7 +258,7 @@ class User
     end
     stream = Twitter::JSONStream.connect(
       :host => 'userstream.twitter.com',
-      :path => '/2/user.json' + params,
+      :path => '/1.1/user.json' + params,
       :ssl => true,
       :user_agent => "TwiMeido/#{TwiMeido::Version}",
       :filters => tracking_keywords_world,
@@ -321,12 +334,12 @@ class User
           TwiMeido.current_user = self
           pull_mentions if notification.include?(:mention)
           pull_dms if notification.include?(:dm)
-          update_blocked_user_ids
         }
 
         EM.defer(pull_rest_api)
       end
     end
+    update_blocked_user_ids
   end
 
   private
@@ -340,7 +353,7 @@ class User
   def pull_mentions
     return unless last_mention_id
 
-    tweets = rest_api_client.statuses.mentions?(
+    tweets = rest_api_client.statuses.mentions_timeline?(
       :since_id => last_mention_id, :count => 200, :include_entities => true
     )
     return if tweets.empty?
@@ -376,10 +389,8 @@ class User
   end
 
   def update_blocked_user_ids
-    users = rest_api_client.blocks.blocking? # wtf Twitter would ignore :page
-    update_attributes(:blocked_user_ids => users.collect(&:id))
-
-    sleep 5
+    users = rest_api_client.blocks.list? # fixme use cursor
+    update_attributes(:blocked_user_ids => users[:users].collect(&:id))
   rescue => e
     puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end

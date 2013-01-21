@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Hashie::Mash
   class << self
     def to_mongo(value)
