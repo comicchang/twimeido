@@ -341,7 +341,12 @@ class User
         EM.defer(pull_rest_api)
       end
     end
-    update_blocked_user_ids
+    update_blocked = lambda {
+      TwiMeido.current_user = self
+      update_blocked_user_ids
+    }
+
+    EM.defer update_blocked
   end
 
   private
@@ -393,6 +398,8 @@ class User
   def update_blocked_user_ids
     users = rest_api_client.blocks.list? # fixme use cursor
     update_attributes(:blocked_user_ids => users[:users].collect(&:id))
+
+    sleep 5
   rescue => e
     puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end
