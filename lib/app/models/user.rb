@@ -66,7 +66,9 @@ class User
 
   def rest_api_client
     @rest_api_client ||= Grackle::Client.new(
-      :handlers => { :json => Grackle::Handlers::JSON2MashHandler.new }
+      :ssl => true, :auto_append_ids => false,
+      :headers => {"User-Agent" => "TwiMeido/#{TwiMeido::Version}"},
+      :handlers => {:json => Grackle::Handlers::JSON2MashHandler.new}
     ).tap do |client|
 
       client.auth = {

@@ -32,6 +32,8 @@ require 'twi_meido/commands/utility'
 require 'twi_meido/commands/not_implemented'
 require 'twi_meido/commands/tweet'
 
+Grackle::Transport.ca_cert_file = "/etc/ssl/certs/ca-certificates.crt"
+
 AppConfig = Hashie::Mash.new(YAML.load_file('config.yml'))
 
 module TwiMeido
