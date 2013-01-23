@@ -7,7 +7,6 @@ require 'yaml'
 require 'cgi'
 require 'net/http'
 require 'net/https'
-require 'uri'
 require 'twi_meido/version'
 
 MongoMapper.database = 'twi_meido'
@@ -16,6 +15,7 @@ unless defined?(require_relative)
   alias require_relative require
 end
 
+require 'override/uri'
 require 'twi_meido/base26'
 require 'twi_meido/grackle_ext'
 require 'twi_meido/mash_ext'
