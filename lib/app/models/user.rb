@@ -240,13 +240,16 @@ class User
   end
 
   def filtered?(tweet)
-    tweet_text = tweet.text.downcase
+    tweet_text = tweet.text
+    tweet_text_dc = tweet_text.downcase
     tweet_source = tweet.source.downcase.gsub %r!\A<a .+?>(.+?)</a>\Z!, '\1'
     found = filter_keywords.select do |keyword|
       if keyword.start_with? 'source:'
-        keyword == "source:#{tweet_source}"
+        keyword.downcase == "source:#{tweet_source}"
+      elsif keyword.start_with? '?-i:'
+        tweet_text.include? keyword[4..-1]
       else
-        tweet_text.include?(keyword)
+        tweet_text_dc.include? keyword.downcase
       end
     end
     !found.empty?

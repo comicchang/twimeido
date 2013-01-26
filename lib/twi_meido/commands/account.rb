@@ -148,14 +148,16 @@ Currently you've turned on #{user.notification.join(' ')}.
 
     define_command :filter, /\A(un)?filter(?:\s+(.*))?\Z/i do |user, message, params|
       un = params[1]
-      keyword = params[2].to_s.downcase
-      if un # unfilter
-        user.filter_keywords -= [keyword]
-      else  # filter
-        user.filter_keywords += [keyword]
+      keyword = params[2].to_s.strip
+      unless keyword.empty?
+        if un # unfilter
+          user.filter_keywords -= [keyword]
+        else  # filter
+          user.filter_keywords += [keyword]
+        end
+        user.filter_keywords.uniq!
+        user.save
       end
-      user.filter_keywords.uniq!
-      user.save
 
       "Now filtering: \"#{user.filter_keywords.join(', ')}\",　ご主人様."
     end
