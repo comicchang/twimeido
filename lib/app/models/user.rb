@@ -34,6 +34,7 @@ class User
   key :last_dm_id,              Integer
   key :friends_ids,             Array
   key :blocked_user_ids,        Array
+  key :no_retweets_ids,         Array
   timestamps!
 
   key :screen_name,             String
@@ -344,12 +345,12 @@ class User
         EM.defer(pull_rest_api)
       end
     end
-    update_blocked = lambda {
+    rest_update_ids = lambda {
       TwiMeido.current_user = self
-      update_blocked_user_ids
+      update_ids
     }
 
-    EM.defer update_blocked
+    EM.defer rest_update_ids
   end
 
   private
@@ -398,9 +399,11 @@ class User
     puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end
 
-  def update_blocked_user_ids
-    users = rest_api_client.blocks.list? # fixme use cursor
-    update_attributes(:blocked_user_ids => users[:users].collect(&:id))
+  def update_ids
+    blocks = rest_api_client.blocks.ids? # fixme use cursor
+    retweets = rest_api_client.friendships.no_retweets.ids?
+    update_attributes(:blocked_user_ids => blocks.ids,
+                      :no_retweets_ids => retweets)
 
     sleep 5
   rescue => e
