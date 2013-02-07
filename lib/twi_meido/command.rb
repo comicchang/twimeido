@@ -328,21 +328,28 @@ Tweets per day: #{'%.2f' % (user.statuses_count.to_f / (Time.now.to_date - Time.
 
     def extract_event(event)
       if event.source.present? && event.source.screen_name == current_user.screen_name
-        if event.event == 'follow' # TODO: unfollow?
+        case event.event
+        when 'follow'
           current_user.friends_ids += [event.target.id]
           current_user.friends_ids.uniq!
           current_user.save
-        elsif event.event == 'block'
+          noshow = true unless event.target.protected
+        when 'unfollow'
+          current_user.friends_ids -= [event.target.id]
+          current_user.friends_ids.uniq!
+          current_user.save
+        when 'block'
           current_user.blocked_user_ids += [event.target.id]
           current_user.blocked_user_ids.uniq!
           current_user.save
-        elsif event.event == 'unblock'
+        when 'unblock'
           current_user.blocked_user_ids -= [event.target.id]
           current_user.blocked_user_ids.uniq!
           current_user.save
         end
         ''
-      elsif current_user.notification.include?(:event)
+      end
+      if current_user.notification.include?(:event) and not noshow
         format_event(event)
       end
     end
