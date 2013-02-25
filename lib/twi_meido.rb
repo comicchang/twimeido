@@ -101,7 +101,7 @@ MESSAGE
     stanza = Blather::Stanza::Presence.new
     stanza.id = stanza.object_id
     stanza.type = :probe
-    stanza.to = s.from.strip! # Fail w/ resource?
+    stanza.to = s.from.strip!
     timer = EM::Timer.new(2) do
       client.unregister_tmp_handler stanza.id
       if user.notification.include? :home
@@ -112,8 +112,8 @@ MESSAGE
       end
       user.save
     end
-    callback = lambda { |x|
-      timer.cancel
+    callback = lambda { |s|
+      timer.cancel unless s.from.resource.start_with? 'android'
     }
     client.register_tmp_handler stanza.id, &callback
     client.write stanza
@@ -122,7 +122,7 @@ MESSAGE
 
   status do |s|
     user = User.first_or_create(:jabber_id => s.from.stripped.to_s.downcase)
-    if user.home_was_on == 1
+    if not s.from.resource.start_with? 'android' and user.home_was_on == 1
       user.home_was_on = -1
       user.notification += [:home]
       user.save
