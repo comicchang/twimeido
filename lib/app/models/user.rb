@@ -1,18 +1,24 @@
+# encoding: utf-8
 class User
   include MongoMapper::Document
   include TwiMeido::Command
   plugin MongoMapper::Plugins::IdentityMap
 
-  key :jabber_id,               String, :index => true
+  key :jabber_id,               String
+  ensure_index :jabber_id
   key :last_said,               String
   key :request_token,           String
   key :request_token_secret,    String
-  key :oauth_token,             String, :index => true
-  key :oauth_token_secret,      String, :index => true
-  key :latitude_access_token,   String, :index => true
+  key :oauth_token,             String
+  ensure_index :oauth_token
+  key :oauth_token_secret,      String
+  ensure_index :oauth_token_secret
+  key :latitude_access_token,   String
+  ensure_index :latitude_access_token
   key :latitude_created_at,     Time
   key :latitude_expires_in,     Integer
-  key :latitude_refresh_token,  String, :index => true
+  key :latitude_refresh_token,  String
+  ensure_index :latitude_refresh_token
   key :latitude_on,             Integer, :default => -1
   key :notification,            Array, :default => [:mention, :dm, :event]
   key :tracking_keywords,       Array
@@ -28,11 +34,14 @@ class User
   key :last_dm_id,              Integer
   key :friends_ids,             Array
   key :blocked_user_ids,        Array
+  key :no_retweets_ids,         Array
   timestamps!
 
   key :screen_name,             String
-  key :twitter_user_id,         Integer, :index => true
+  key :twitter_user_id,         Integer
+  ensure_index :twitter_user_id
   key :twitter_user_created_at, DateTime
+
 
   Notifications = [:home, :mention, :dm, :event, :track]
   MaxShortId = 'ZZ'.as_b26_to_i
@@ -58,7 +67,9 @@ class User
 
   def rest_api_client
     @rest_api_client ||= Grackle::Client.new(
-      :handlers => { :json => Grackle::Handlers::JSON2MashHandler.new }
+      :ssl => true, :auto_append_ids => false,
+      :headers => {"User-Agent" => "TwiMeido/#{TwiMeido::Version}"},
+      :handlers => {:json => Grackle::Handlers::JSON2MashHandler.new}
     ).tap do |client|
 
       client.auth = {
@@ -230,9 +241,17 @@ class User
   end
 
   def filtered?(tweet)
-    tweet_text = tweet.text.downcase
+    tweet_text = tweet.text
+    tweet_text_dc = tweet_text.downcase
+    tweet_source = tweet.source.downcase.gsub %r!\A<a .+?>(.+?)</a>\Z!, '\1'
     found = filter_keywords.select do |keyword|
-      tweet_text.include?(keyword.downcase)
+      if keyword.start_with? 'source:'
+        keyword.downcase == "source:#{tweet_source}"
+      elsif keyword.start_with? '?-i:'
+        tweet_text.include? keyword[4..-1]
+      else
+        tweet_text_dc.include? keyword.downcase
+      end
     end
     !found.empty?
   end
@@ -245,7 +264,7 @@ class User
     end
     stream = Twitter::JSONStream.connect(
       :host => 'userstream.twitter.com',
-      :path => '/2/user.json' + params,
+      :path => '/1.1/user.json' + params,
       :ssl => true,
       :user_agent => "TwiMeido/#{TwiMeido::Version}",
       :filters => tracking_keywords_world,
@@ -321,12 +340,17 @@ class User
           TwiMeido.current_user = self
           pull_mentions if notification.include?(:mention)
           pull_dms if notification.include?(:dm)
-          update_blocked_user_ids
         }
 
         EM.defer(pull_rest_api)
       end
     end
+    rest_update_ids = lambda {
+      TwiMeido.current_user = self
+      update_ids
+    }
+
+    EM.defer rest_update_ids
   end
 
   private
@@ -340,7 +364,7 @@ class User
   def pull_mentions
     return unless last_mention_id
 
-    tweets = rest_api_client.statuses.mentions?(
+    tweets = rest_api_client.statuses.mentions_timeline?(
       :since_id => last_mention_id, :count => 200, :include_entities => true
     )
     return if tweets.empty?
@@ -375,9 +399,11 @@ class User
     puts "#{Time.now.to_s :db} #{screen_name}: #{e.method} #{e.request_uri} => #{e.status}"
   end
 
-  def update_blocked_user_ids
-    users = rest_api_client.blocks.blocking? # wtf Twitter would ignore :page
-    update_attributes(:blocked_user_ids => users.collect(&:id))
+  def update_ids
+    blocks = rest_api_client.blocks.ids? # fixme use cursor
+    retweets = rest_api_client.friendships.no_retweets.ids?
+    update_attributes(:blocked_user_ids => blocks.ids,
+                      :no_retweets_ids => retweets)
 
     sleep 5
   rescue => e

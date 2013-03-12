@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rubygems'
 require 'bundler/setup'
 Bundler.require
@@ -6,7 +7,6 @@ require 'yaml'
 require 'cgi'
 require 'net/http'
 require 'net/https'
-require 'uri'
 require 'twi_meido/version'
 
 MongoMapper.database = 'twi_meido'
@@ -15,6 +15,7 @@ unless defined?(require_relative)
   alias require_relative require
 end
 
+require 'override/uri'
 require 'twi_meido/base26'
 require 'twi_meido/grackle_ext'
 require 'twi_meido/mash_ext'
@@ -31,6 +32,8 @@ require 'twi_meido/commands/utility'
 require 'twi_meido/commands/not_implemented'
 require 'twi_meido/commands/tweet'
 
+Grackle::Transport.ca_cert_file = "/etc/ssl/certs/ca-certificates.crt"
+
 AppConfig = Hashie::Mash.new(YAML.load_file('config.yml'))
 
 module TwiMeido
@@ -40,7 +43,7 @@ module TwiMeido
     attr_accessor :user_streams
 
     def current_user
-      Thread.current[:current_user]
+      Thread.current[:current_user].reload
     end
 
     def current_user=(user)
@@ -56,7 +59,7 @@ module TwiMeido
 
   when_ready do
     client.roster.each do |jid, roster_item|
-      discover :info, jid, nil
+      #discover :info, jid, nil
     end
 
     connect_user_streams
@@ -66,8 +69,9 @@ module TwiMeido
   end
 
   subscription :request? do |s|
-    User.first_or_create(:jabber_id => s.from.stripped.to_s)
+    User.first_or_create(:jabber_id => s.from.stripped.to_s.downcase)
     write_to_stream s.approve!
+    write_to_stream s.request!
     say s.to, <<MESSAGE
 おかえりなさいませ、ご主人様！
 
@@ -77,7 +81,7 @@ MESSAGE
 
   message :chat?, :body do |m|
     operation = lambda {
-      self.current_user = User.first_or_create(:jabber_id => m.from.stripped.to_s)
+      self.current_user = User.first_or_create(:jabber_id => m.from.stripped.to_s.downcase)
       process_message(current_user, m)
     }
     callback = lambda {|response|
@@ -93,11 +97,11 @@ MESSAGE
   end
 
   status :state => :unavailable do |s|
-    user = User.first_or_create(:jabber_id => s.from.stripped.to_s)
+    user = User.first_or_create(:jabber_id => s.from.stripped.to_s.downcase)
     stanza = Blather::Stanza::Presence.new
     stanza.id = stanza.object_id
     stanza.type = :probe
-    stanza.to = s.from.strip! # Fail w/ resource?
+    stanza.to = s.from.strip!
     timer = EM::Timer.new(2) do
       client.unregister_tmp_handler stanza.id
       if user.notification.include? :home
@@ -108,8 +112,8 @@ MESSAGE
       end
       user.save
     end
-    callback = lambda {
-      timer.cancel
+    callback = lambda { |s|
+      timer.cancel unless s.from.resource.start_with? 'android'
     }
     client.register_tmp_handler stanza.id, &callback
     client.write stanza
@@ -117,8 +121,8 @@ MESSAGE
   end
 
   status do |s|
-    user = User.first_or_create(:jabber_id => s.from.stripped.to_s)
-    if user.home_was_on == 1
+    user = User.first_or_create(:jabber_id => s.from.stripped.to_s.downcase)
+    if not s.from.resource.start_with? 'android' and user.home_was_on == 1
       user.home_was_on = -1
       user.notification += [:home]
       user.save
@@ -126,8 +130,8 @@ MESSAGE
   end
 
   def self.process_user_stream(item)
-    notification = extract_notification(item)
-    send_message(current_user, notification) if notification
+    notification = extract_notification(item).to_s
+    send_message(current_user, notification) unless notification.empty?
   end
 
   def self.process_rest_polling(items)
@@ -144,6 +148,7 @@ MESSAGE
 
   def self.send_message(user, message)
     # The trailing space can prevent Google Talk chomp the blank line
+    message = message.to_s
     message = message.rstrip + "\n\n "
     jabber_id = user.respond_to?(:jabber_id) ? user.jabber_id : user
     say jabber_id, message

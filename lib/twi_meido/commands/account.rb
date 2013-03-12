@@ -1,3 +1,4 @@
+# encoding: utf-8
 module TwiMeido
   module AccountCommands
     extend Command
@@ -147,14 +148,16 @@ Currently you've turned on #{user.notification.join(' ')}.
 
     define_command :filter, /\A(un)?filter(?:\s+(.*))?\Z/i do |user, message, params|
       un = params[1]
-      keywords = params[2].to_s.downcase.split(/\s+/)
-      if un # unfilter
-        user.filter_keywords -= keywords
-      else  # filter
-        user.filter_keywords += keywords
+      keyword = params[2].to_s.strip
+      unless keyword.empty?
+        if un # unfilter
+          user.filter_keywords -= [keyword]
+        else  # filter
+          user.filter_keywords += [keyword]
+        end
+        user.filter_keywords.uniq!
+        user.save
       end
-      user.filter_keywords.uniq!
-      user.save
 
       "Now filtering: \"#{user.filter_keywords.join(', ')}\",　ご主人様."
     end
@@ -236,28 +239,22 @@ Currently you've turned on #{user.notification.join(' ')}.
       "You're no longer blocking @#{screen_name} now, ご主人様."
     end
 
-    define_command :if_block, /\Aib\s+(\S+)\Z/i do |user, message, params|
-      begin
-        screen_name = params[1]
-
-        TwiMeido.current_user.rest_api_client.blocks.exists? :screen_name => screen_name
-        message = "You're blocking @#{screen_name}, ご主人様."
-      rescue Grackle::TwitterError => error
-        if error.status == 404
-          message = "You're not blocking @#{screen_name}, ご主人様."
-        else
-          raise error
-        end
-      end
-
-      message
-    end
-
     define_command :report_spam, /\Aspam\s+(\S+)\Z/i do |user, message, params|
       screen_name = params[1]
 
-      TwiMeido.current_user.rest_api_client.report_spam! :screen_name => screen_name
+      TwiMeido.current_user.rest_api_client.users.report_spam! :screen_name => screen_name
       "You have reported @#{screen_name} as spam, ご主人様."
+    end
+
+    define_command :if_block, /\Aib\s+(\S+)\Z/i do |user, message, params|
+      screen_name = params[1]
+
+      result = TwiMeido.current_user.rest_api_client.friendships.show? :target_screen_name => screen_name
+      if result.relationship.source.blocking
+        "You're blocking @#{screen_name}, ご主人様."
+      else
+        "You're not blocking @#{screen_name}, ご主人様."
+      end
     end
   end
 end

@@ -1,7 +1,8 @@
+# encoding: utf-8
 class DirectMessage
   include MongoMapper::Document
 
-  key :_id, Integer, :index => true
+  key :_id, Integer
   key :sender, Hashie::Mash
 
   class << self

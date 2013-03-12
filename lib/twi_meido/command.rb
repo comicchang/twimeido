@@ -1,3 +1,4 @@
+# encoding: utf-8
 module TwiMeido
   module Command
     include ActionView::Helpers::DateHelper
@@ -119,12 +120,16 @@ module TwiMeido
     end
 
     def load_conversation(tweet, shorten_id = true, conversation_length = 5)
-      if tweet.in_reply_to_status_id && conversation_length > 0
-        in_reply_to_tweet = Tweet.fetch(tweet.in_reply_to_status_id)
-        if in_reply_to_tweet
-          conversation = [format_single_tweet(in_reply_to_tweet, shorten_id)]
-          conversation << load_conversation(in_reply_to_tweet, shorten_id, conversation_length - 1)
+      begin
+        if tweet.in_reply_to_status_id && conversation_length > 0
+          in_reply_to_tweet = Tweet.fetch(tweet.in_reply_to_status_id)
+          if in_reply_to_tweet
+            conversation = [format_single_tweet(in_reply_to_tweet, shorten_id)]
+            conversation << load_conversation(in_reply_to_tweet, shorten_id, conversation_length - 1)
+          end
         end
+      rescue NoMethodError
+        ''
       end
     end
 
@@ -313,7 +318,10 @@ Tweets per day: #{'%.2f' % (user.statuses_count.to_f / (Time.now.to_date - Time.
         unless current_user.viewed_tweet_ids.include?(tweet.id)
           User.create_or_update_from_tweet(tweet)
           unless current_user.blocked_user_ids.include?(tweet.user.id) ||
-            (tweet.retweeted_status.present? && (current_user.blocked_user_ids.include?(tweet.retweeted_status.user.id) || current_user.viewed_tweet_ids.include?(tweet.retweeted_status.id)))
+            (tweet.retweeted_status.present? &&
+              (current_user.blocked_user_ids.include?(tweet.retweeted_status.user.id) ||
+               current_user.no_retweets_ids.include?(tweet.user.id) ||
+               current_user.viewed_tweet_ids.include?(tweet.retweeted_status.id)))
 
             format_tweet(tweet)
           end
@@ -323,20 +331,28 @@ Tweets per day: #{'%.2f' % (user.statuses_count.to_f / (Time.now.to_date - Time.
 
     def extract_event(event)
       if event.source.present? && event.source.screen_name == current_user.screen_name
-        if event.event == 'follow' # TODO: unfollow?
+        case event.event
+        when 'follow'
           current_user.friends_ids += [event.target.id]
           current_user.friends_ids.uniq!
           current_user.save
-        elsif event.event == 'block'
+          noshow = true unless event.target.protected
+        when 'unfollow'
+          current_user.friends_ids -= [event.target.id]
+          current_user.friends_ids.uniq!
+          current_user.save
+        when 'block'
           current_user.blocked_user_ids += [event.target.id]
           current_user.blocked_user_ids.uniq!
           current_user.save
-        elsif event.event == 'unblock'
+        when 'unblock'
           current_user.blocked_user_ids -= [event.target.id]
           current_user.blocked_user_ids.uniq!
           current_user.save
         end
-      elsif current_user.notification.include?(:event)
+        ''
+      end
+      if current_user.notification.include?(:event) and not noshow
         format_event(event)
       end
     end

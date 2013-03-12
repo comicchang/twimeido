@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Integer
    Base26Digits = ('A'..'Z').to_a.freeze
 
