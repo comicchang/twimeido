@@ -129,7 +129,7 @@ module TwiMeido
           end
         end
       rescue NoMethodError
-        ''
+        []
       end
     end
 

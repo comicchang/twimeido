@@ -247,6 +247,16 @@ class User
     found = filter_keywords.select do |keyword|
       if keyword.start_with? 'source:'
         keyword.downcase == "source:#{tweet_source}"
+      elsif keyword.start_with? 'link:'
+        result = false
+        if tweet.entities.present?
+          tweet.entities.urls.each do |url|
+            if url.expanded_url and url.expanded_url.include? keyword[5..-1]
+              result = true
+            end
+          end
+        end
+        result
       elsif keyword.start_with? '?-i:'
         tweet_text.include? keyword[4..-1]
       else
